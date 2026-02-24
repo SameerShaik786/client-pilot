@@ -71,7 +71,7 @@ export function LandingPage() {
 
                 <h1 className="text-6xl md:text-8xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-400 leading-[1.1] tracking-tight mb-4">
                     ClientPilot <br />
-                    <span className="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] md:text-6xl">Freelance Ops Perfected.</span>
+                    <span className="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] md:text-6xl text-3xla">Freelance Ops Perfected.</span>
                 </h1>
 
                 <p className="mt-6 font-normal text-base md:text-lg text-neutral-400 max-w-xl balance px-4">
@@ -82,7 +82,7 @@ export function LandingPage() {
                 <div className="mt-10 flex flex-col items-center gap-8">
                     <Link
                         to="/dashboard"
-                        className="px-12 py-6 rounded-full bg-white text-black font-black text-xl hover:bg-neutral-200 transition-all hover:scale-105 active:scale-95 shadow-[0_0_50px_rgba(255,255,255,0.3)]"
+                        className="px-12 py-6 rounded-full bg-white text-black font-black text-2xl hover:bg-neutral-200 transition-all hover:scale-105 active:scale-95 shadow-[0_0_50px_rgba(255,255,255,0.3)]"
                     >
                         Launch Dashboard
                     </Link>
