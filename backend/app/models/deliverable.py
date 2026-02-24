@@ -1,17 +1,17 @@
-"""Project model with enforced state machine transitions.
+"""Deliverable model with enforced state machine transitions.
 
-Status transitions are validated by the model itself — calling
-transition_status() with an invalid target raises StateTransitionError.
-This prevents invalid states at the domain level, not just the API level.
+Follows the same state machine pattern as Project for consistency.
+Status transitions are enforced via transition_status().
 
 State diagram:
-    active ←→ on_hold    (can toggle between these)
-    active  → completed  (terminal)
-    on_hold → completed  (terminal)
-    completed → (nothing) (no transitions out of completed)
+    planned     → in_progress
+    in_progress → blocked
+    in_progress → completed
+    blocked     → in_progress
+    completed   → (nothing — terminal)
 
 Relationships:
-    Client → has many → Projects → has many → Deliverables
+    Project → has many → Deliverables
 """
 
 from datetime import datetime, timezone
@@ -19,38 +19,39 @@ from app.extensions import db
 from app.errors import StateTransitionError
 
 
-class ProjectStatus:
-    """Valid project statuses and their allowed transitions."""
+class DeliverableStatus:
+    """Valid deliverable statuses and their allowed transitions."""
 
-    ACTIVE = "active"
-    ON_HOLD = "on_hold"
+    PLANNED = "planned"
+    IN_PROGRESS = "in_progress"
+    BLOCKED = "blocked"
     COMPLETED = "completed"
 
-    ALL = {ACTIVE, ON_HOLD, COMPLETED}
+    ALL = {PLANNED, IN_PROGRESS, BLOCKED, COMPLETED}
 
-    # Maps current_status → set of valid target statuses
     TRANSITIONS = {
-        ACTIVE: {ON_HOLD, COMPLETED},
-        ON_HOLD: {ACTIVE, COMPLETED},
-        COMPLETED: set(),  # Terminal state — no transitions allowed
+        PLANNED: {IN_PROGRESS},
+        IN_PROGRESS: {BLOCKED, COMPLETED},
+        BLOCKED: {IN_PROGRESS},
+        COMPLETED: set(),  # Terminal state
     }
 
 
-class Project(db.Model):
-    """A project belonging to a client."""
+class Deliverable(db.Model):
+    """A deliverable within a project."""
 
-    __tablename__ = "projects"
+    __tablename__ = "deliverables"
 
     id = db.Column(db.Integer, primary_key=True)
-    client_id = db.Column(
-        db.Integer, db.ForeignKey("clients.id"), nullable=False, index=True
+    project_id = db.Column(
+        db.Integer, db.ForeignKey("projects.id"), nullable=False, index=True
     )
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=True)
     status = db.Column(
-        db.String(20), nullable=False, default=ProjectStatus.ACTIVE
+        db.String(20), nullable=False, default=DeliverableStatus.PLANNED
     )
-    deadline = db.Column(db.Date, nullable=True)
+    due_date = db.Column(db.Date, nullable=True)
     created_at = db.Column(
         db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
     )
@@ -61,14 +62,9 @@ class Project(db.Model):
         onupdate=lambda: datetime.now(timezone.utc),
     )
 
-    # Relationships
-    deliverables = db.relationship(
-        "Deliverable", backref="project", lazy="dynamic", cascade="all, delete-orphan"
-    )
-
     def __init__(self, **kwargs):
         """Set default status at creation time (not just at DB commit)."""
-        kwargs.setdefault("status", ProjectStatus.ACTIVE)
+        kwargs.setdefault("status", DeliverableStatus.PLANNED)
         super().__init__(**kwargs)
 
     def transition_status(self, new_status):
@@ -83,16 +79,16 @@ class Project(db.Model):
         Raises:
             StateTransitionError: If the transition is not allowed.
         """
-        if new_status not in ProjectStatus.ALL:
+        if new_status not in DeliverableStatus.ALL:
             raise StateTransitionError(
                 current_status=self.status,
                 target_status=new_status,
                 valid_transitions=sorted(
-                    ProjectStatus.TRANSITIONS.get(self.status, set())
+                    DeliverableStatus.TRANSITIONS.get(self.status, set())
                 ),
             )
 
-        allowed = ProjectStatus.TRANSITIONS.get(self.status, set())
+        allowed = DeliverableStatus.TRANSITIONS.get(self.status, set())
         if new_status not in allowed:
             raise StateTransitionError(
                 current_status=self.status,
@@ -105,4 +101,4 @@ class Project(db.Model):
         return old_status
 
     def __repr__(self):
-        return f"<Project {self.id}: {self.title} [{self.status}]>"
+        return f"<Deliverable {self.id}: {self.title} [{self.status}]>"

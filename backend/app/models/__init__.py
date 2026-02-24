@@ -6,6 +6,7 @@ from app.models.project import Project, ProjectStatus
 from app.models.deliverable import Deliverable, DeliverableStatus
 
 __all__ = [
-    "User", "Client", "Project", "ProjectStatus",
+    "User", "Client",
+    "Project", "ProjectStatus",
     "Deliverable", "DeliverableStatus",
 ]
