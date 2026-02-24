@@ -5,6 +5,9 @@ Design decisions:
 - Extensions are initialized here but created in extensions.py (avoids circular imports)
 - Blueprints are registered via api/__init__.py (keeps this file focused)
 - Tables are auto-created in dev/test (no migration needed during development)
+
+Note: The Flask instance is named 'flask_app' (not 'app') to avoid a
+Python naming conflict with the 'app' package itself.
 """
 
 import os
@@ -26,37 +29,37 @@ def create_app(config_name=None):
     if config_name is None:
         config_name = os.environ.get("FLASK_ENV", "development")
 
-    app = Flask(__name__)
-    app.config.from_object(config_by_name[config_name])
+    flask_app = Flask(__name__)
+    flask_app.config.from_object(config_by_name[config_name])
 
     # Initialize extensions
-    db.init_app(app)
-    ma.init_app(app)
-    migrate.init_app(app, db)
-    cors.init_app(app, resources={r"/api/*": {"origins": "*"}})
+    db.init_app(flask_app)
+    ma.init_app(flask_app)
+    migrate.init_app(flask_app, db)
+    cors.init_app(flask_app, resources={r"/api/*": {"origins": "*"}})
 
     # Configure logging
-    _configure_logging(app)
+    _configure_logging(flask_app)
 
     # Register error handlers and middleware
-    register_error_handlers(app)
-    register_middleware(app)
+    register_error_handlers(flask_app)
+    register_middleware(flask_app)
 
     # Register API blueprints
     from app.api import register_blueprints
-    register_blueprints(app)
+    register_blueprints(flask_app)
 
     # Create tables (for development / testing without migrations)
-    with app.app_context():
-        import app.models  # noqa: F401 — triggers model registration
+    with flask_app.app_context():
+        from app import models  # noqa: F401 — triggers model registration
         db.create_all()
 
-    return app
+    return flask_app
 
 
-def _configure_logging(app):
+def _configure_logging(flask_app):
     """Set up structured logging."""
-    log_level = getattr(logging, app.config.get("LOG_LEVEL", "INFO"))
+    log_level = getattr(logging, flask_app.config.get("LOG_LEVEL", "INFO"))
 
     handler = logging.StreamHandler()
     handler.setLevel(log_level)
@@ -67,8 +70,8 @@ def _configure_logging(app):
     )
     handler.setFormatter(formatter)
 
-    app.logger.handlers = [handler]
-    app.logger.setLevel(log_level)
+    flask_app.logger.handlers = [handler]
+    flask_app.logger.setLevel(log_level)
 
     logging.getLogger("app").handlers = [handler]
     logging.getLogger("app").setLevel(log_level)
