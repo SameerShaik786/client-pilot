@@ -12,7 +12,9 @@ def register_blueprints(app):
     from app.api.projects import projects_bp
     from app.api.deliverables import deliverables_bp
     from app.api.dashboard import dashboard_bp
+    from app.api.ai import ai_bp
     app.register_blueprint(clients_bp, url_prefix="/api/clients")
     app.register_blueprint(projects_bp, url_prefix="/api/projects")
     app.register_blueprint(deliverables_bp, url_prefix="/api/deliverables")
     app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
+    app.register_blueprint(ai_bp, url_prefix="/api/ai")
