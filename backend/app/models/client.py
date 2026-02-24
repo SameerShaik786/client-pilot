@@ -5,7 +5,7 @@ This is a simple entity with no state machine. Clients are always
 (YAGNI — we can add it later if needed without breaking anything).
 
 Relationships:
-    Client → has many → Projects (cascade delete)
+    User → has many → Clients → has many → Projects
 """
 
 from datetime import datetime, timezone
@@ -18,6 +18,9 @@ class Client(db.Model):
     __tablename__ = "clients"
 
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id"), nullable=False, index=True
+    )
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(254), nullable=False)
     company = db.Column(db.String(120), nullable=True)
