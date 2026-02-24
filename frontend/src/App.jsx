@@ -5,6 +5,9 @@ import { Clients } from './pages/Clients';
 import { ClientDetail } from './pages/ClientDetail';
 import { ProjectDetail } from './pages/ProjectDetail';
 import { LandingPage } from './pages/LandingPage';
+import { AuthLayout } from './pages/AuthLayout';
+import { Login } from './pages/Login';
+import { Signup } from './pages/Signup';
 
 function App() {
   return (
@@ -12,6 +15,10 @@ function App() {
       <div className="dark min-h-screen bg-background text-foreground selection:bg-primary/30">
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route element={<AuthLayout />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+          </Route>
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/clients" element={<Clients />} />
