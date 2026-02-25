@@ -20,6 +20,7 @@ from app.models.client import Client
 from app.models.project import Project
 from app.models.deliverable import Deliverable
 from app.errors import NotFoundError, AppError
+from app.api.auth_utils import get_current_user_id
 from app.schemas import (
     DeliverableCreateSchema,
     DeliverableUpdateSchema,
@@ -37,17 +38,10 @@ _response_schema = DeliverableResponseSchema()
 _response_list_schema = DeliverableResponseSchema(many=True)
 
 
-def _get_current_user_id():
-    user_id = session.get("user_id")
-    if not user_id:
-        raise AppError("Authentication required", code="AUTH_REQUIRED", status_code=401)
-    return user_id
-
-
 @deliverables_bp.route("", methods=["GET"])
 def list_deliverables():
     """List all deliverables for the current user."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     
     # Complex join to ensure full ownership chain
     deliverables = (
@@ -62,7 +56,7 @@ def list_deliverables():
 @deliverables_bp.route("", methods=["POST"])
 def create_deliverable():
     """Create a new deliverable."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     data = _create_schema.load(request.get_json())
     
     # Verify the project exists and belongs to the user via client
@@ -89,7 +83,7 @@ def create_deliverable():
 @deliverables_bp.route("/<int:deliverable_id>", methods=["GET"])
 def get_deliverable(deliverable_id):
     """Get deliverable details."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     
     deliverable = (
         Deliverable.query.join(Project).join(Client)
@@ -105,7 +99,7 @@ def get_deliverable(deliverable_id):
 @deliverables_bp.route("/<int:deliverable_id>", methods=["PUT"])
 def update_deliverable(deliverable_id):
     """Update deliverable metadata (title, description, due_date)."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     
     deliverable = (
         Deliverable.query.join(Project).join(Client)
@@ -131,7 +125,7 @@ def update_deliverable(deliverable_id):
 @deliverables_bp.route("/<int:deliverable_id>/status", methods=["PATCH"])
 def transition_deliverable_status(deliverable_id):
     """Transition deliverable status using the state machine."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     
     deliverable = (
         Deliverable.query.join(Project).join(Client)
@@ -153,7 +147,7 @@ def transition_deliverable_status(deliverable_id):
 @deliverables_bp.route("/<int:deliverable_id>", methods=["DELETE"])
 def delete_deliverable(deliverable_id):
     """Delete a deliverable."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     
     deliverable = (
         Deliverable.query.join(Project).join(Client)

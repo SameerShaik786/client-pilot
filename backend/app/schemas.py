@@ -74,6 +74,7 @@ class ClientCreateSchema(ma.Schema):
         validate=validate.Length(max=120),
         load_default=None,
     )
+    logo_url = fields.URL(validate=validate.Length(max=500), load_default=None)
     notes = fields.String(load_default=None)
 
 
@@ -85,6 +86,7 @@ class ClientUpdateSchema(ma.Schema):
         validate=[validate.Email(), validate.Length(max=254)]
     )
     company = fields.String(validate=validate.Length(max=120))
+    logo_url = fields.URL(validate=validate.Length(max=500))
     notes = fields.String()
 
 
@@ -134,7 +136,7 @@ class ProjectResponseSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Project
         include_fk = True
-        dump_only = ("id", "status", "created_at", "updated_at")
+        dump_only = ("id", "status", "progress_percentage", "created_at", "updated_at")
 
 
 # ── Deliverable Schemas ──────────────────────────────────────

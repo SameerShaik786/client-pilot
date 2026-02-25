@@ -12,8 +12,8 @@ Stats included:
 """
 
 from datetime import datetime, timezone
-from flask import Blueprint, jsonify, session
-from sqlalchemy import func
+from flask import Blueprint, jsonify
+from app.api.auth_utils import get_current_user_id
 from app.extensions import db
 from app.models.client import Client
 from app.models.project import Project, ProjectStatus
@@ -23,17 +23,10 @@ from app.errors import AppError
 dashboard_bp = Blueprint("dashboard", __name__)
 
 
-def _get_current_user_id():
-    user_id = session.get("user_id")
-    if not user_id:
-        raise AppError("Authentication required", code="AUTH_REQUIRED", status_code=401)
-    return user_id
-
-
 @dashboard_bp.route("", methods=["GET"])
 def get_summary():
     """Get aggregated dashboard statistics."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     now = datetime.now(timezone.utc)
 
     # 1. Client count

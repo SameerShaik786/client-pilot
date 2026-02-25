@@ -66,6 +66,7 @@ export const api = {
 
     // Deliverables (nested under project)
     getProjectDeliverables: (projectId) => request(`/projects/${projectId}/deliverables`),
+    createDeliverable: (projectId, data) => request(`/projects/${projectId}/deliverables`, { method: 'POST', body: JSON.stringify(data) }),
     updateDeliverableStatus: (id, status) => request(`/deliverables/${id}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status })

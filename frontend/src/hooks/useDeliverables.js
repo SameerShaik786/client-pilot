@@ -33,9 +33,20 @@ export function useDeliverables(projectId) {
         },
     });
 
+    const createDeliverableMutation = useMutation({
+        mutationFn: (data) => api.createDeliverable(projectId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['deliverables', projectId] });
+            queryClient.invalidateQueries({ queryKey: ['project', projectId] });
+            toast.success('Deliverable created.');
+        },
+        onError: () => toast.error('Failed to create deliverable.'),
+    });
+
     return {
         deliverables: deliverablesQuery.data || [],
         isLoading: deliverablesQuery.isLoading,
+        createDeliverable: createDeliverableMutation.mutate,
         updateStatus: updateStatusMutation.mutate,
         deleteDeliverable: deleteDeliverableMutation.mutate,
     };

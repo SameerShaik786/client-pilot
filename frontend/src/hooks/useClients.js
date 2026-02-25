@@ -29,11 +29,21 @@ export function useClients() {
         onError: () => toast.error('Failed to remove client.'),
     });
 
+    const updateClientMutation = useMutation({
+        mutationFn: ({ id, data }) => api.updateClient(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['clients'] });
+            toast.success('Client updated.');
+        },
+        onError: () => toast.error('Failed to update client.'),
+    });
+
     return {
         clients: clientsQuery.data || [],
         isLoading: clientsQuery.isLoading,
         error: clientsQuery.error,
         createClient: createClientMutation.mutate,
+        updateClient: updateClientMutation.mutate,
         deleteClient: deleteClientMutation.mutate,
     };
 }

@@ -104,5 +104,22 @@ class Project(db.Model):
         self.status = new_status
         return old_status
 
+    @property
+    def progress_percentage(self):
+        """Calculate project progress based on completed deliverables.
+        
+        Returns:
+            Integer representing the percentage of completed deliverables.
+            Returns 0 if there are no deliverables.
+        """
+        total = self.deliverables.count()
+        if total == 0:
+            return 0
+        
+        # Using the DeliverableStatus.COMPLETED literal directly since we don't
+        # want to import Deliverable here to avoid circular imports if any.
+        completed = self.deliverables.filter_by(status="completed").count()
+        return int((completed / total) * 100)
+
     def __repr__(self):
         return f"<Project {self.id}: {self.title} [{self.status}]>"

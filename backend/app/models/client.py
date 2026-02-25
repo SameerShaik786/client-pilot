@@ -24,6 +24,7 @@ class Client(db.Model):
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(254), nullable=False)
     company = db.Column(db.String(120), nullable=True)
+    logo_url = db.Column(db.String(500), nullable=True)
     notes = db.Column(db.Text, nullable=True)
     created_at = db.Column(
         db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)

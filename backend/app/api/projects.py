@@ -19,6 +19,7 @@ from app.extensions import db
 from app.models.client import Client
 from app.models.project import Project
 from app.errors import NotFoundError, AppError
+from app.api.auth_utils import get_current_user_id
 from app.schemas import (
     ProjectCreateSchema,
     ProjectUpdateSchema,
@@ -36,17 +37,10 @@ _response_schema = ProjectResponseSchema()
 _response_list_schema = ProjectResponseSchema(many=True)
 
 
-def _get_current_user_id():
-    user_id = session.get("user_id")
-    if not user_id:
-        raise AppError("Authentication required", code="AUTH_REQUIRED", status_code=401)
-    return user_id
-
-
 @projects_bp.route("", methods=["GET"])
 def list_projects():
     """List all projects for the current user."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     
     # We join with Client to ensure we only see projects for clients that belong to this user
     projects = (
@@ -61,7 +55,7 @@ def list_projects():
 @projects_bp.route("", methods=["POST"])
 def create_project():
     """Create a new project."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     data = _create_schema.load(request.get_json())
     
     # Verify the client exists and belongs to the user
@@ -84,7 +78,7 @@ def create_project():
 @projects_bp.route("/<int:project_id>", methods=["GET"])
 def get_project(project_id):
     """Get project details."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     
     project = (
         Project.query.join(Client)
@@ -100,7 +94,7 @@ def get_project(project_id):
 @projects_bp.route("/<int:project_id>", methods=["PUT"])
 def update_project(project_id):
     """Update project metadata (title, description, deadline)."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     
     project = (
         Project.query.join(Client)
@@ -126,7 +120,7 @@ def update_project(project_id):
 @projects_bp.route("/<int:project_id>/status", methods=["PATCH"])
 def transition_project_status(project_id):
     """Transition project status using the state machine."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     
     project = (
         Project.query.join(Client)
@@ -148,7 +142,7 @@ def transition_project_status(project_id):
 @projects_bp.route("/<int:project_id>", methods=["DELETE"])
 def delete_project(project_id):
     """Delete a project."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     
     project = (
         Project.query.join(Client)
@@ -161,3 +155,30 @@ def delete_project(project_id):
     db.session.delete(project)
     db.session.commit()
     return jsonify({"data": {"message": f"Project '{project.title}' deleted"}}), 200
+
+
+@projects_bp.route("/<int:project_id>/deliverables", methods=["GET"])
+def list_project_deliverables(project_id):
+    """List all deliverables for a specific project (scoped to current user)."""
+    from app.models.deliverable import Deliverable
+    from app.schemas import DeliverableResponseSchema
+
+    user_id = get_current_user_id()
+
+    # Verify project belongs to user via client
+    project = (
+        Project.query.join(Client)
+        .filter(Project.id == project_id, Client.user_id == user_id)
+        .first()
+    )
+    if not project:
+        raise NotFoundError("Project", project_id)
+
+    deliverables = (
+        Deliverable.query
+        .filter_by(project_id=project_id)
+        .order_by(Deliverable.created_at.desc())
+        .all()
+    )
+    schema = DeliverableResponseSchema(many=True)
+    return jsonify({"data": schema.dump(deliverables)}), 200

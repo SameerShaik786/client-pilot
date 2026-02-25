@@ -12,10 +12,21 @@ export function useProjects(clientId) {
         select: (response) => response.data,
     });
 
+    const createProjectMutation = useMutation({
+        mutationFn: api.createProject,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['projects', 'client', clientId] });
+            queryClient.invalidateQueries({ queryKey: ['projects', 'all'] });
+            toast.success('Project created.');
+        },
+        onError: () => toast.error('Failed to create project.'),
+    });
+
     const deleteProjectMutation = useMutation({
         mutationFn: api.deleteProject,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['projects', 'client', clientId] });
+            queryClient.invalidateQueries({ queryKey: ['projects', 'all'] });
             toast.success('Project deleted.');
         },
     });
@@ -24,6 +35,7 @@ export function useProjects(clientId) {
         projects: projectsQuery.data || [],
         isLoading: projectsQuery.isLoading,
         error: projectsQuery.error,
+        createProject: createProjectMutation.mutate,
         deleteProject: deleteProjectMutation.mutate,
     };
 }
