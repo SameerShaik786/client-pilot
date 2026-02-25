@@ -26,6 +26,7 @@ import { useProject } from "@/hooks/useProjects";
 import { useDeliverables } from "@/hooks/useDeliverables";
 import { cn } from "@/lib/utils";
 import { DeliverableModal } from '@/components/DeliverableModal';
+import { AIScopeAgent } from '@/components/AIScopeAgent';
 
 const STATUS_COLORS = {
     planned: { bg: 'bg-neutral-500/10', text: 'text-neutral-400', label: 'Planned' },
@@ -218,6 +219,11 @@ export function ProjectDetail() {
                     </div>
                 )}
             </div>
+            {/* AI Scope Agent */}
+            <AIScopeAgent onApprove={(deliverables) => {
+                deliverables.forEach(d => createDeliverable({ title: d.title }));
+            }} />
+
             <DeliverableModal
                 isOpen={deliverableModalOpen}
                 onClose={() => setDeliverableModalOpen(false)}

@@ -142,9 +142,9 @@ class ProjectResponseSchema(ma.SQLAlchemyAutoSchema):
 # ── Deliverable Schemas ──────────────────────────────────────
 
 class DeliverableCreateSchema(ma.Schema):
-    """Schema for creating a deliverable — title and project_id required."""
+    """Schema for creating a deliverable — title required. project_id handled by route."""
 
-    project_id = fields.Integer(required=True)
+    project_id = fields.Integer(load_default=None) # Optional because URL takes precedence
     title = fields.String(
         required=True,
         validate=validate.Length(min=1, max=200),

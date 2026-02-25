@@ -75,4 +75,8 @@ export const api = {
 
     // Dashboard
     getDashboardStats: () => request('/dashboard'),
+
+    // AI Agent
+    structureScope: (text) => request('/ai/structure-scope', { method: 'POST', body: JSON.stringify({ text }) }),
+    analyzeRisk: (projectId) => request('/ai/analyze-risk', { method: 'POST', body: JSON.stringify({ project_id: projectId }) }),
 };

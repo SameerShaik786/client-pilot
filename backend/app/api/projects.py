@@ -157,6 +157,39 @@ def delete_project(project_id):
     return jsonify({"data": {"message": f"Project '{project.title}' deleted"}}), 200
 
 
+@projects_bp.route("/<int:project_id>/deliverables", methods=["POST"])
+def create_project_deliverable(project_id):
+    """Create a new deliverable for a specific project."""
+    from app.models.deliverable import Deliverable
+    from app.schemas import DeliverableCreateSchema, DeliverableResponseSchema
+
+    user_id = get_current_user_id()
+
+    # Verify project belongs to user
+    project = (
+        Project.query.join(Client)
+        .filter(Project.id == project_id, Client.user_id == user_id)
+        .first()
+    )
+    if not project:
+        raise NotFoundError("Project", project_id)
+
+    schema = DeliverableCreateSchema()
+    data = schema.load(request.get_json())
+
+    deliverable = Deliverable(
+        project_id=project_id,
+        title=data["title"],
+        description=data.get("description"),
+        due_date=data.get("due_date")
+    )
+    db.session.add(deliverable)
+    db.session.commit()
+
+    res_schema = DeliverableResponseSchema()
+    return jsonify({"data": res_schema.dump(deliverable)}), 201
+
+
 @projects_bp.route("/<int:project_id>/deliverables", methods=["GET"])
 def list_project_deliverables(project_id):
     """List all deliverables for a specific project (scoped to current user)."""

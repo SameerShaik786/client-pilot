@@ -10,27 +10,21 @@ user-scoping (only analyze data the user owns) and returns results
 from the AI (or mock results if no API key).
 """
 
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify
 from app.services.ai_engine import AIEngine
 from app.models.client import Client
 from app.models.project import Project
 from app.errors import AppError, NotFoundError
+from app.api.auth_utils import get_current_user_id
 
 ai_bp = Blueprint("ai", __name__)
 engine = AIEngine()
 
 
-def _get_current_user_id():
-    user_id = session.get("user_id")
-    if not user_id:
-        raise AppError("Authentication required", code="AUTH_REQUIRED", status_code=401)
-    return user_id
-
-
 @ai_bp.route("/structure-scope", methods=["POST"])
 def structure_scope():
     """Analyze raw text and return structured project data."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     data = request.get_json()
     
     raw_text = data.get("text")
@@ -44,7 +38,7 @@ def structure_scope():
 @ai_bp.route("/analyze-risk", methods=["POST"])
 def analyze_risk():
     """Analyze a specific project's deliverables for risk."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     data = request.get_json()
     
     project_id = data.get("project_id")
@@ -81,7 +75,7 @@ def analyze_risk():
 @ai_bp.route("/generate-update", methods=["POST"])
 def generate_update():
     """Generate a client update email draft."""
-    user_id = _get_current_user_id()
+    user_id = get_current_user_id()
     data = request.get_json()
     
     project_id = data.get("project_id")

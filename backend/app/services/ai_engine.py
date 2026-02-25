@@ -27,7 +27,7 @@ class AIEngine:
         self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
         if self.api_key:
             genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel("gemini-1.5-flash")
+            self.model = genai.GenerativeModel("gemini-2.5-flash")
         else:
             self.model = None
             logger.warning("GEMINI_API_KEY not found. AI features will run in Mock Mode.")
