@@ -1,226 +1,131 @@
 import React from 'react';
-import { motion } from "framer-motion";
+import { useNavigate } from 'react-router-dom';
 import {
     Users,
     Briefcase,
-    Clock,
-    TrendingUp,
-    Plus,
-    ArrowUpRight,
-    ShieldCheck,
-    Zap,
-    Activity,
-    Search,
-    Bell
+    AlertCircle,
+    ShieldAlert,
+    Calendar,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { useDashboard } from "@/hooks/useDashboard";
+import { useAllProjects } from "@/hooks/useProjects";
 import { cn } from "@/lib/utils";
 
-const stats = [
-    { label: "Total Clients", value: "24", icon: Users, trend: "+12%", color: "text-blue-400", glow: "shadow-blue-500/20" },
-    { label: "Active Projects", value: "8", icon: Briefcase, trend: "+2", color: "text-emerald-400", glow: "shadow-emerald-500/20" },
-    { label: "Pending Deliverables", value: "12", icon: Clock, trend: "-4", color: "text-amber-400", glow: "shadow-amber-500/20" },
-    { label: "Revenue Rate", value: "$4.2k", icon: TrendingUp, trend: "+18%", color: "text-purple-400", glow: "shadow-purple-500/20" },
-];
-
-const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.1
-        }
-    }
-};
-
-const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-        y: 0,
-        opacity: 1,
-        transition: {
-            type: "spring",
-            stiffness: 100
-        }
-    }
+const STATUS_COLORS = {
+    active: { text: 'text-emerald-400', label: 'Active' },
+    on_hold: { text: 'text-amber-400', label: 'On Hold' },
+    completed: { text: 'text-blue-400', label: 'Completed' },
 };
 
 export function Dashboard() {
-    return (
-        <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-            className="space-y-10 pb-20"
-        >
-            {/* Command Header */}
-            <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/5 pb-8">
-                <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500">
-                        <Activity className="w-3 h-3 text-emerald-500 animate-pulse" />
-                        System: Operational / Session ID: CP-992
-                    </div>
-                    <h2 className="text-4xl font-black text-white tracking-tighter italic">
-                        Mission <span className="text-neutral-500 not-italic font-light">Control</span>
-                    </h2>
-                    <p className="text-neutral-500 text-sm font-medium">Monitoring 4 active agentic workflows across your portfolio.</p>
-                </div>
-                <div className="flex items-center gap-4">
-                    <div className="relative group hidden lg:block">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-600 group-focus-within:text-white transition-colors" />
-                        <input
-                            type="text"
-                            placeholder="Search Command..."
-                            className="bg-neutral-900/50 border border-white/5 rounded-full pl-10 pr-4 py-2 text-xs text-white placeholder:text-neutral-700 focus:outline-none focus:border-white/20 focus:bg-black transition-all w-64"
-                        />
-                    </div>
-                    <Button variant="outline" size="icon" className="rounded-full border-white/5 bg-neutral-900/50 hover:bg-neutral-800 text-neutral-400">
-                        <Bell className="w-4 h-4" />
-                    </Button>
-                    <Button className="rounded-full bg-white text-black hover:bg-neutral-200 font-bold px-6 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-                        <Plus className="w-4 h-4 mr-2 stroke-[3]" />
-                        Deploy New Client
-                    </Button>
-                </div>
-            </motion.div>
+    const navigate = useNavigate();
+    const { summary, isLoading: dashLoading, error: dashError } = useDashboard();
+    const { data: allProjects = [], isLoading: projLoading } = useAllProjects();
 
-            {/* Orbital Stats */}
-            <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, i) => (
-                    <motion.div
-                        key={i}
-                        whileHover={{ y: -5, scale: 1.02 }}
-                        className={cn(
-                            "relative group p-6 rounded-[2rem] bg-neutral-900/20 border border-white/5 backdrop-blur-md overflow-hidden transition-all duration-500 hover:border-white/10 shadow-2xl",
-                            stat.glow
-                        )}
-                    >
-                        {/* Background Detail */}
-                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-colors" />
+    const isLoading = dashLoading || projLoading;
 
-                        <div className="relative z-10 flex flex-col gap-4">
-                            <div className="flex items-center justify-between">
-                                <div className={cn("p-2 rounded-xl bg-black/40 border border-white/5", stat.color)}>
-                                    <stat.icon className="w-5 h-5" />
-                                </div>
-                                <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20">
-                                    {stat.trend}
-                                </span>
-                            </div>
-                            <div>
-                                <div className="text-4xl font-black text-white tracking-tighter italic">{stat.value}</div>
-                                <div className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mt-1">{stat.label}</div>
-                            </div>
-                        </div>
+    if (isLoading) {
+        return <Spinner label="Loading dashboard..." />;
+    }
 
-                        {/* Animated Bottom Line */}
-                        <div className="absolute bottom-0 left-0 h-[2px] w-full bg-neutral-800 group-hover:bg-white transition-all duration-700 origin-left scale-x-0 group-hover:scale-x-100" />
-                    </motion.div>
-                ))}
-            </motion.div>
-
-            {/* Intelligence Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Active Operations Audit */}
-                <motion.div variants={itemVariants} className="lg:col-span-2">
-                    <Card className="bg-neutral-900/30 border-white/5 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
-                        <CardHeader className="flex flex-row items-center justify-between border-b border-white/5 px-8 py-6">
-                            <div>
-                                <CardTitle className="text-white text-xl font-black tracking-tight italic">Active <span className="not-italic font-light opacity-50">Operations</span></CardTitle>
-                                <CardDescription className="text-neutral-500 text-xs mt-1">Movement across tactical deliverables</CardDescription>
-                            </div>
-                            <Button variant="ghost" className="text-[10px] uppercase font-black tracking-widest text-neutral-500 hover:text-white hover:bg-white/5">
-                                View Registry
-                            </Button>
-                        </CardHeader>
-                        <CardContent className="p-4 px-8">
-                            <div className="space-y-4">
-                                {[1, 2, 3].map((item) => (
-                                    <div key={item} className="group flex items-center gap-6 p-4 rounded-3xl hover:bg-white/[0.03] border border-transparent hover:border-white/5 transition-all cursor-pointer">
-                                        <div className="relative">
-                                            <div className="w-12 h-12 rounded-2xl bg-black border border-white/10 flex items-center justify-center">
-                                                <ShieldCheck className="w-6 h-6 text-neutral-500 group-hover:text-white transition-colors" />
-                                            </div>
-                                            {item === 1 && <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-black animate-ping" />}
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <h4 className="text-sm font-black text-white italic tracking-tight uppercase">Protocol {item === 1 ? 'Delta' : 'Omega'}</h4>
-                                                <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-neutral-400 border border-white/5">v.2.0</span>
-                                            </div>
-                                            <p className="text-[10px] text-neutral-500 mt-1 font-bold uppercase tracking-wider">Internal Infrastructure {item} • Active Agent</p>
-                                        </div>
-                                        <div className="hidden md:block">
-                                            <div className="flex gap-1">
-                                                {[1, 2, 3, 4, 5].map((s) => (
-                                                    <div key={s} className={cn("w-1 h-3 rounded-full bg-neutral-800", s <= 3 && "bg-white/40")} />
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="text-xs font-black text-white italic">72%</div>
-                                            <div className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Complete</div>
-                                        </div>
-                                        <ArrowUpRight className="w-4 h-4 text-neutral-800 group-hover:text-white transition-colors" />
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-
-                {/* AI Insight Pulse */}
-                <motion.div variants={itemVariants} className="relative">
-                    <Card className="h-full bg-gradient-to-br from-neutral-900 to-black border-white/5 rounded-[2.5rem] relative overflow-hidden group p-2">
-                        {/* Interactive Scan Line Effect */}
-                        <motion.div
-                            animate={{ y: [0, 400, 0] }}
-                            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                            className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent z-10 pointer-events-none"
-                        />
-
-                        <div className="relative z-20 h-full flex flex-col p-6">
-                            <div className="flex items-center justify-between mb-8">
-                                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-                                    <Zap className="w-7 h-7 text-black fill-black" />
-                                </div>
-                                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
-                                    Agentic Pulse
-                                </div>
-                            </div>
-
-                            <div className="space-y-6">
-                                <h3 className="text-2xl font-black text-white italic tracking-tighter leading-none">
-                                    Tactical <br />
-                                    <span className="text-neutral-500 not-italic font-light">Insights</span>
-                                </h3>
-
-                                <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-3">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                                        <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Risk Alert</span>
-                                    </div>
-                                    <p className="text-xs text-neutral-400 font-medium leading-relaxed italic">
-                                        "Detected communication gap with <span className="text-white font-bold">Vector Studios</span>. Engagement probability dropping 15%."
-                                    </p>
-                                </div>
-
-                                <div className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest leading-relaxed">
-                                    Recommendation: Initiate automated protocol for status update synchronization.
-                                </div>
-                            </div>
-
-                            <div className="mt-auto pt-8">
-                                <Button className="w-full bg-white text-black hover:bg-neutral-200 rounded-2xl font-black h-14 group">
-                                    Launch Agent Flow
-                                    <ArrowUpRight className="w-4 h-4 ml-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                </Button>
-                            </div>
-                        </div>
-                    </Card>
-                </motion.div>
+    if (dashError) {
+        return (
+            <div className="h-[70vh] flex flex-col items-center justify-center gap-4">
+                <AlertCircle className="w-12 h-12 opacity-20 text-red-500" />
+                <p className="text-sm font-bold text-white">Failed to load dashboard</p>
+                <p className="text-xs text-neutral-500">{dashError.message}</p>
             </div>
-        </motion.div>
+        );
+    }
+
+    const overdueCount = summary?.overdue_deliverable_count ?? 0;
+    const totalProjects = summary?.active_project_count ?? 0;
+    const riskScore = totalProjects > 0 ? Math.min(Math.round((overdueCount / Math.max(totalProjects, 1)) * 100), 100) : 0;
+
+    const stats = [
+        { label: "Total Clients", value: summary?.client_count ?? 0, icon: Users, color: "text-blue-400" },
+        { label: "Active Projects", value: summary?.active_project_count ?? 0, icon: Briefcase, color: "text-emerald-400" },
+        { label: "Overdue", value: overdueCount, icon: AlertCircle, color: "text-red-400" },
+        { label: "Risk Score", value: `${riskScore}%`, icon: ShieldAlert, color: riskScore > 50 ? "text-red-400" : "text-emerald-400" },
+    ];
+
+    const activeProjects = (allProjects || []).filter(p => p.status === 'active');
+
+    return (
+        <div className="space-y-10 pb-20">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-neutral-800 pb-8">
+                <div>
+                    <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard</h1>
+                    <p className="text-neutral-500 text-sm mt-1">Operational overview of your freelance system.</p>
+                </div>
+                <Button className="bg-neutral-900 text-white font-semibold rounded-full px-6 border border-neutral-800 hover:bg-neutral-800 transition-all active:scale-95">
+                    <ShieldAlert className="w-4 h-4 mr-2" />
+                    Run AI Risk Scan
+                </Button>
+            </div>
+
+            {/* Stats Row */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                {stats.map((stat, i) => (
+                    <div key={i} className="space-y-1">
+                        <div className="flex items-center gap-2">
+                            <stat.icon className={cn("w-4 h-4", stat.color)} />
+                            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">{stat.label}</span>
+                        </div>
+                        <p className="text-3xl font-bold text-white">{stat.value}</p>
+                    </div>
+                ))}
+            </div>
+
+            {/* Active Projects */}
+            <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+                    <h2 className="text-lg font-bold text-white">Active Projects</h2>
+                    <span className="text-xs text-neutral-600">{activeProjects.length} active</span>
+                </div>
+
+                {activeProjects.length === 0 ? (
+                    <div className="py-16 text-center">
+                        <Briefcase className="w-8 h-8 text-neutral-700 mx-auto mb-2" />
+                        <p className="text-sm text-neutral-500">No active projects yet</p>
+                    </div>
+                ) : (
+                    <div className="divide-y divide-neutral-800/50">
+                        {activeProjects.map((project) => {
+                            const statusStyle = STATUS_COLORS[project.status] || STATUS_COLORS.active;
+                            return (
+                                <div
+                                    key={project.id}
+                                    onClick={() => navigate(`/clients/${project.client_id}/projects/${project.id}`)}
+                                    className="flex items-center justify-between py-4 cursor-pointer hover:bg-neutral-900/40 -mx-2 px-2 rounded-lg transition-colors group"
+                                >
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-semibold text-white group-hover:text-neutral-200 truncate">{project.title}</p>
+                                        <p className="text-xs text-neutral-600 mt-0.5">Client #{project.client_id}</p>
+                                    </div>
+                                    <div className="flex items-center gap-4 shrink-0 ml-4">
+                                        <span className={cn("text-xs font-semibold", statusStyle.text)}>{statusStyle.label}</span>
+                                        {project.deadline && (
+                                            <span className="text-xs text-neutral-500 flex items-center gap-1">
+                                                <Calendar className="w-3 h-3" />
+                                                {new Date(project.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                            </span>
+                                        )}
+                                        <div className="w-20">
+                                            <Progress value={project.progress_percentage ?? 0} className="h-1 bg-neutral-800" />
+                                        </div>
+                                        <span className="text-xs font-semibold text-neutral-400 w-8 text-right">{project.progress_percentage ?? 0}%</span>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }

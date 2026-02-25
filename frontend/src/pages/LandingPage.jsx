@@ -40,22 +40,22 @@ const avatars = [
 
 const features = [
     {
-        title: "Agentic Intelligence",
+        title: "Agentic intelligence",
         description: "AI agents that understand your project context and help you structure scope.",
         icon: "🤖",
     },
     {
-        title: "Risk Monitoring",
+        title: "Risk monitoring",
         description: "Stay ahead of potential hurdles with real-time risk analysis and mitigation strategies.",
         icon: "⚖️",
     },
     {
-        title: "Client Updates",
+        title: "Client updates",
         description: "Draft professional project updates for clients in seconds with custom tone control.",
         icon: "✉️",
     },
     {
-        title: "Deliverable Tracking",
+        title: "Deliverable tracking",
         description: "Keep your projects on track with an automated deliverable management system.",
         icon: "📈",
     },
@@ -71,7 +71,7 @@ export function LandingPage() {
 
                 <h1 className="text-6xl md:text-8xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-neutral-400 leading-[1.1] tracking-tight mb-4">
                     ClientPilot <br />
-                    <span className="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] md:text-6xl text-3xla">Freelance Ops Perfected.</span>
+                    <span className="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] md:text-6xl text-3xl">Freelance ops perfected.</span>
                 </h1>
 
                 <p className="mt-6 font-normal text-base md:text-lg text-neutral-400 max-w-xl balance px-4">
@@ -84,7 +84,7 @@ export function LandingPage() {
                         to="/dashboard"
                         className="px-12 py-6 rounded-full bg-white text-black font-black text-2xl hover:bg-neutral-200 transition-all hover:scale-105 active:scale-95 shadow-[0_0_50px_rgba(255,255,255,0.3)]"
                     >
-                        Launch Dashboard
+                        Launch dashboard
                     </Link>
 
                     <div className="flex flex-col items-center gap-3">
@@ -113,7 +113,7 @@ export function LandingPage() {
                 {features.map((f, i) => (
                     <div key={i} className="group p-6 rounded-2xl bg-neutral-900/30 border border-white/5 hover:border-white/10 transition-all flex flex-col items-start gap-3">
                         <span className="text-3xl">{f.icon}</span>
-                        <h3 className="text-lg font-bold text-white tracking-tight">{f.title}</h3>
+                        <h3 className="text-lg font-bold text-white tracking-tight capitalize">{f.title}</h3>
                         <p className="text-neutral-500 text-sm leading-relaxed">{f.description}</p>
                     </div>
                 ))}
@@ -152,7 +152,7 @@ export function LandingPage() {
                         <div>
                             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Product</h4>
                             <ul className="space-y-3 text-neutral-500 font-medium text-sm">
-                                <li><a href="#" className="hover:text-white transition-colors">Early Access</a></li>
+                                <li><a href="#" className="hover:text-white transition-colors">Early access</a></li>
                                 <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
                                 <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
                             </ul>
@@ -160,9 +160,9 @@ export function LandingPage() {
                         <div>
                             <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Legal</h4>
                             <ul className="space-y-3 text-neutral-500 font-medium text-sm">
-                                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                                <li><a href="#" className="hover:text-white transition-colors">Cookie Policy</a></li>
+                                <li><a href="#" className="hover:text-white transition-colors">Privacy policy</a></li>
+                                <li><a href="#" className="hover:text-white transition-colors">Terms of service</a></li>
+                                <li><a href="#" className="hover:text-white transition-colors">Cookie policy</a></li>
                             </ul>
                         </div>
                     </div>
